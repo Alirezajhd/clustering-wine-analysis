@@ -413,14 +413,14 @@ Two heuristics were used to estimate $\varepsilon$:
 
 \begin{table}[H]
 \centering
-\caption{Epsilon Estimation}
+\caption{Epsilon Estimation (Original Feature Space)}
 \begin{tabular}{lc}
 \toprule
 \textbf{Method} & \textbf{Epsilon Value} \\
 \midrule
-Elbow-based & 4.41 \\
-Statistical & 3.08 \\
-Selected & 3.08 \\
+Elbow-based & 4.4080 \\
+Statistical & 3.0759 \\
+Selected (min) & 3.0759 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -434,7 +434,7 @@ Selected & 3.08 \\
 \toprule
 \textbf{Metric} & \textbf{Value} \\
 \midrule
-Epsilon ($\varepsilon$) & 3.08 \\
+Epsilon ($\varepsilon$) & 3.0759 \\
 MinPts & 5 \\
 Clusters detected & 1 \\
 Noise points & 10 (5.6\%) \\
@@ -444,24 +444,49 @@ Noise points & 10 (5.6\%) \\
 
 \subsection{Feature Space Modification}
 
-Since DBSCAN produced only one cluster, the feature space was modified using PCA reduction:
+Since DBSCAN produced only one cluster, the feature space was modified using PCA reduction with 5 components. The same dual-method epsilon estimation was applied:
 
 \begin{table}[H]
 \centering
-\caption{DBSCAN with PCA-Reduced Space}
+\caption{Epsilon Estimation in PCA-Reduced Space}
 \begin{tabular}{lc}
 \toprule
-\textbf{Metric} & \textbf{Value} \\
+\textbf{Method} & \textbf{Epsilon Value} \\
 \midrule
-PCA Components & 5 \\
-New Epsilon & 1.85 \\
-Clusters detected & 1 \\
-Noise points & 18 (10.1\%) \\
+Elbow-based (PCA) & 3.7595 \\
+Statistical (PCA) & 2.1386 \\
+Selected (min) & 2.1386 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The Wine dataset's distribution does not form clearly separated density regions suitable for DBSCAN with standard parameter estimation approaches.
+\\begin{table}[H]
+\\centering
+\\caption{DBSCAN Results in PCA-Reduced Space}
+\\begin{tabular}{lc}
+\\toprule
+\\textbf{Metric} & \\textbf{Value} \\\\
+\\midrule
+PCA Components & 5 \\\\
+Epsilon (selected) & 2.1386 \\\\
+MinPts & 5 \\\\
+Clusters detected & 1 \\\\
+Noise points & 11 (6.2\%) \\\\
+\\bottomrule
+\\end{tabular}
+\\end{table}
+
+\\subsection{Analysis}
+
+The DBSCAN algorithm demonstrates the importance of consistent parameter estimation methodology:
+
+\\begin{itemize}
+    \\item \\textbf{Original Space}: Used dual-method approach (elbow + statistical) to estimate $\\varepsilon = 3.0759$
+    \\item \\textbf{PCA Space}: Applied identical dual-method approach, selecting minimum of two estimates: $\\varepsilon = 2.1386$
+    \\item \\textbf{Consistency}: Both methods use the same principled approach for reproducibility
+\\end{itemize}
+
+Both original and PCA-reduced spaces produced only a single cluster with minor noise (5.6\\% and 6.2\\% respectively), indicating the Wine dataset's distribution does not form clearly separated density regions suitable for DBSCAN. The dataset exhibits a continuous distribution rather than distinct density clusters.
 
 % ==============================================================================
 \section{Part 6: Fully Automated Clustering System}

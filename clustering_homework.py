@@ -540,11 +540,24 @@ def automated_dbscan_clustering(data_dict):
         nbrs_pca.fit(X_pca)
         distances_pca, _ = nbrs_pca.kneighbors(X_pca)
         k_distances_pca = distances_pca[:, k]
+        k_distances_pca_sorted = np.sort(k_distances_pca)
         
-        # Re-estimate epsilon
-        eps_pca = np.mean(k_distances_pca) + 0.5 * np.std(k_distances_pca)
+        # Re-estimate epsilon using same dual-method approach
+        # Elbow method: find point of maximum curvature
+        diffs_pca = np.diff(k_distances_pca_sorted)
+        second_diffs_pca = np.diff(diffs_pca)
+        elbow_idx_pca = np.argmax(second_diffs_pca) + 1
+        eps_elbow_pca = k_distances_pca_sorted[elbow_idx_pca]
         
-        print(f"   New epsilon (PCA space): {eps_pca:.4f}")
+        # Statistical method: mean + std
+        eps_statistical_pca = np.mean(k_distances_pca) + np.std(k_distances_pca)
+        
+        # Use the minimum of both methods
+        eps_pca = min(eps_elbow_pca, eps_statistical_pca)
+        
+        print(f"   Elbow-based epsilon (PCA): {eps_elbow_pca:.4f}")
+        print(f"   Statistical epsilon (PCA): {eps_statistical_pca:.4f}")
+        print(f"   Selected epsilon (PCA): {eps_pca:.4f}")
         
         dbscan_pca = DBSCAN(eps=eps_pca, min_samples=k)
         labels_pca = dbscan_pca.fit_predict(X_pca)
@@ -809,7 +822,7 @@ def bonus_cluster_stability_noise(data_dict):
             ari_scores.append(ari)
         
         results.append({
-            'Noise Level (σ)': sigma,
+            'Noise Level (sigma)': sigma,
             'Mean ARI': np.mean(ari_scores),
             'Std ARI': np.std(ari_scores),
             'Min ARI': np.min(ari_scores),
@@ -824,7 +837,7 @@ def bonus_cluster_stability_noise(data_dict):
     print("\nStability Analysis:")
     for _, row in results_df.iterrows():
         mean_ari = row['Mean ARI']
-        sigma = row['Noise Level (σ)']
+        sigma = row['Noise Level (sigma)']
         if mean_ari > 0.9:
             stability = "Very stable"
         elif mean_ari > 0.7:
@@ -833,7 +846,7 @@ def bonus_cluster_stability_noise(data_dict):
             stability = "Low stability"
         else:
             stability = "Unstable"
-        print(f"   σ={sigma}: {stability} (Mean ARI = {mean_ari:.4f})")
+        print(f"   Sigma={sigma}: {stability} (Mean ARI = {mean_ari:.4f})")
     
     return results_df
 
